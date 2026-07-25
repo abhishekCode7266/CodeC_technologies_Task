@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered ATS & Recruitment Platform</title>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --sidebar-bg: #0f172a;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --ai-accent: #8b5cf6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .brand {
+            padding: 20px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #334155;
+            color: #fff;
+        }
+
+        .brand i {
+            color: var(--ai-accent);
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 15px 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: #1e293b;
+            color: #fff;
+            border-left: 4px solid var(--ai-accent);
+        }
+
+        /* Main Workspace */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            padding: 16px 30px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 9px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-ai {
+            background-color: var(--ai-accent);
+            color: white;
+        }
+
+        .btn-ai:hover {
+            background-color: #7c3aed;
+        }
+
+        .content-body {
+            padding: 25px;
+            flex: 1;
+        }
+
+        .view-panel {
+            display: none;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        /* Metrics Dashboard */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .metric-card {
+            background-color: var(--bg-card);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .metric-card .title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .metric-card .value {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        /* Job Requirements Box */
+        .job-context {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .skills-tag {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        /* Kanban Pipeline Board */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            align-items: start;
+        }
+
+        .kanban-column {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 520px;
+        }
+
+        .column-header {
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .candidate-card {
+            background: var(--bg-card);
+            padding: 14px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            cursor: grab;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            position: relative;
+        }
+
+        .candidate-card .name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .candidate-card .role {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .match-high { background: #dcfce7; color: #15803d; }
+        .match-med { background: #fef3c7; color: #b45309; }
+        .match-low { background: #fee2e2; color: #b91c1c; }
+
+        /* Schedule Grid / List */
+        .schedule-table, .candidates-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .schedule-table th, .schedule-table td,
+        .candidates-table th, .candidates-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .schedule-table th, .candidates-table th {
+            background-color: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 8px;
+            width: 480px;
+            max-width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside>
+        <div>
+            <div class="brand">
+                <i class="fa-solid fa-robot"></i> SmartATS AI
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="switchView('dashboard', this)">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </li>
+                <li class="nav-item" onclick="switchView('pipeline', this)">
+                    <i class="fa-solid fa-square-poll-horizontal"></i> Pipeline View
+                </li>
+                <li class="nav-item" onclick="switchView('candidates', this)">
+                    <i class="fa-solid fa-users"></i> AI Screening
+                </li>
+                <li class="nav-item" onclick="switchView('interviews', this)">
+                    <i class="fa-solid fa-calendar-check"></i> Interviews
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main>
+        <header>
+            <h2 id="pageTitle">Recruitment Overview</h2>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-ai" onclick="openCandidateModal()">
+                    <i class="fa-solid fa-file-arrow-up"></i> Add Resume (AI Parsing)
+                </button>
+                <button class="btn btn-primary" onclick="openScheduleModal()">
+                    <i class="fa-solid fa-calendar-plus"></i> Schedule Interview
+                </button>
+            </div>
+        </header>
+
+        <div class="content-body">
+            <!-- Active Job Profile Matcher Context -->
+            <div class="job-context">
+                <div>
+                    <strong>Target Job Role:</strong> Senior Full Stack Engineer
+                    <div style="margin-top: 4px;">
+                        <span class="skills-tag">JavaScript</span>
+                        <span class="skills-tag">React</span>
+                        <span class="skills-tag">Node.js</span>
+                        <span class="skills-tag">Python</span>
+                        <span class="skills-tag">SQL</span>
+                    </div>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-accent);"></i> Auto Match Score Active
+                </div>
+            </div>
+
+            <!-- VIEW 1: DASHBOARD -->
+            <section id="dashboard" class="view-panel active">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="title">Total Applicants</div>
+                        <div class="value" id="totalCandidatesCount">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="title">Average AI Match Score</div>
+                        <div class="value" id="avgMatchRate">0%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="title">Shortlisted Candidates</div>
+                        <div class="value" id="shortlistedCount">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="title">Interviews Scheduled</div>
+                        <div class="value" id="interviewsCount">0</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 15px;">Top AI-Matched Candidates</h3>
+                <table class="candidates-table">
+                    <thead>
+                        <tr>
+                            <th>Candidate Name</th>
+                            <th>Target Role</th>
+                            <th>Parsed Skills</th>
+                            <th>AI Match Score</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topCandidatesTable">
+                        <!-- Dynamically Populated -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- VIEW 2: KANBAN PIPELINE -->
+            <section id="pipeline" class="view-panel">
+                <div class="kanban-board">
+                    <div class="kanban-column" ondragover="allowDrop(event)" ondrop="drop(event, 'Applied')">
+                        <div class="column-header">APPLIED <span id="count-Applied">0</span></div>
+                        <div id="col-Applied"></div>
+                    </div>
+                    <div class="kanban-column" ondragover="allowDrop(event)" ondrop="drop(event, 'Screened')">
+                        <div class="column-header">SCREENED <span id="count-Screened">0</span></div>
+                        <div id="col-Screened"></div>
+                    </div>
+                    <div class="kanban-column" ondragover="allowDrop(event)" ondrop="drop(event, 'Interview')">
+                        <div class="column-header">INTERVIEW <span id="count-Interview">0</span></div>
+                        <div id="col-Interview"></div>
+                    </div>
+                    <div class="kanban-column" ondragover="allowDrop(event)" ondrop="drop(event, 'Offered')">
+                        <div class="column-header">OFFERED <span id="count-Offered">0</span></div>
+                        <div id="col-Offered"></div>
+                    </div>
+                    <div class="kanban-column" ondragover="allowDrop(event)" ondrop="drop(event, 'Hired')">
+                        <div class="column-header">HIRED <span id="count-Hired">0</span></div>
+                        <div id="col-Hired"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 3: AI SCREENING & RESUME PARSER -->
+            <section id="candidates" class="view-panel">
+                <h3 style="margin-bottom: 15px;">All Applicants & Resume Analysis</h3>
+                <table class="candidates-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Skills Detected</th>
+                            <th>AI Match Score</th>
+                            <th>Pipeline Stage</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fullCandidatesTable">
+                        <!-- Dynamically Populated -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- VIEW 4: INTERVIEW SCHEDULER -->
+            <section id="interviews" class="view-panel">
+                <h3 style="margin-bottom: 15px;">Scheduled Interviews</h3>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Type</th>
+                            <th>Date & Time</th>
+                            <th>Interviewer</th>
+                            <th>Stage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="interviewsTable">
+                        <!-- Dynamically Populated -->
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal: Resume Upload & Screening -->
+    <div class="modal" id="candidateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-accent);"></i> AI Candidate Screening</h3>
+                <i class="fa-solid fa-xmark" style="cursor: pointer;" onclick="closeCandidateModal()"></i>
+            </div>
+            <form onsubmit="handleCandidateSubmit(event)">
+                <div class="form-group">
+                    <label>Candidate Full Name</label>
+                    <input type="text" id="candName" required placeholder="e.g. Sarah Jenkins">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="candEmail" required placeholder="sarah.j@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Resume Summary / Text (Simulated Parser)</label>
+                    <textarea id="candResume" rows="4" placeholder="Paste resume text or skills here (e.g. Expert in React, Node.js, JavaScript, and SQL backend optimization)..." required></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                    <button type="button" class="btn" onclick="closeCandidateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-ai"><i class="fa-solid fa-robot"></i> Run AI Parsing</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Schedule Interview -->
+    <div class="modal" id="scheduleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-calendar-plus"></i> Schedule Interview</h3>
+                <i class="fa-solid fa-xmark" style="cursor: pointer;" onclick="closeScheduleModal()"></i>
+            </div>
+            <form onsubmit="handleScheduleSubmit(event)">
+                <div class="form-group">
+                    <label>Select Candidate</label>
+                    <select id="scheduleCandidateSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Interview Type</label>
+                    <select id="scheduleType">
+                        <option value="Technical Round">Technical Round</option>
+                        <option value="System Design">System Design</option>
+                        <option value="HR Culture Fit">HR Culture Fit</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date & Time</label>
+                    <input type="datetime-local" id="scheduleTime" required>
+                </div>
+                <div class="form-group">
+                    <label>Interviewer Name</label>
+                    <input type="text" id="scheduleInterviewer" required placeholder="e.g. Alex Rivera (Lead Architect)">
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                    <button type="button" class="btn" onclick="closeScheduleModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Schedule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Target job required skills for AI matching score algorithm
+        const targetJobSkills = ['javascript', 'react', 'node.js', 'python', 'sql'];
+
+        // Initial Candidate Data
+        let candidates = JSON.parse(localStorage.getItem('ats_candidates')) || [
+            { id: '1', name: 'Alex Mercer', email: 'alex.m@example.com', skills: ['JavaScript', 'React', 'Node.js', 'Python', 'SQL'], matchScore: 100, stage: 'Interview' },
+            { id: '2', name: 'Elena Rostova', email: 'elena.r@example.com', skills: ['React', 'JavaScript', 'CSS'], matchScore: 60, stage: 'Screened' },
+            { id: '3', name: 'David Chen', email: 'david.c@example.com', skills: ['Python', 'SQL', 'Docker'], matchScore: 40, stage: 'Applied' }
+        ];
+
+        // Initial Scheduled Interviews Data
+        let interviews = JSON.parse(localStorage.getItem('ats_interviews')) || [
+            { id: '101', candidateName: 'Alex Mercer', type: 'Technical Round', time: '2026-07-28T14:00', interviewer: 'Alex Rivera' }
+        ];
+
+        window.onload = function() {
+            renderCandidates();
+            renderInterviews();
+            updateDashboardMetrics();
+        };
+
+        // Navigation Switcher
+        function switchView(viewId, element) {
+            document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(viewId).classList.add('active');
+            element.classList.add('active');
+            document.getElementById('pageTitle').innerText = element.innerText.trim();
+        }
+
+        // AI Match Score Calculator Engine
+        function calculateAIMatchScore(extractedSkills) {
+            if (!extractedSkills || extractedSkills.length === 0) return 10;
+            let matches = 0;
+            extractedSkills.forEach(skill => {
+                if (targetJobSkills.includes(skill.toLowerCase())) matches++;
+            });
+            return Math.min(100, Math.round((matches / targetJobSkills.length) * 100));
+        }
+
+        // Mock Resume Keyword Skill Extractor
+        function extractSkillsFromText(text) {
+            const potentialSkills = ['JavaScript', 'React', 'Node.js', 'Python', 'SQL', 'TypeScript', 'Docker', 'AWS', 'Java', 'HTML', 'CSS'];
+            return potentialSkills.filter(skill => text.toLowerCase().includes(skill.toLowerCase()));
+        }
+
+        // Render Candidates across Views
+        function renderCandidates() {
+            renderKanbanPipeline();
+            renderCandidatesTable();
+            renderTopCandidatesTable();
+            updateDashboardMetrics();
+            populateCandidateDropdown();
+            saveData();
+        }
+
+        // Kanban Pipeline Rendering
+        function renderKanbanPipeline() {
+            const stages = ['Applied', 'Screened', 'Interview', 'Offered', 'Hired'];
+            stages.forEach(stage => {
+                const container = document.getElementById(`col-${stage}`);
+                container.innerHTML = '';
+                const stageCandidates = candidates.filter(c => c.stage === stage);
+                
+                document.getElementById(`count-${stage}`).innerText = stageCandidates.length;
+
+                stageCandidates.forEach(candidate => {
+                    const card = document.createElement('div');
+                    card.className = 'candidate-card';
+                    card.draggable = true;
+                    card.ondragstart = (e) => e.dataTransfer.setData('text/plain', candidate.id);
+                    
+                    let badgeClass = candidate.matchScore >= 80 ? 'match-high' : candidate.matchScore >= 50 ? 'match-med' : 'match-low';
+
+                    card.innerHTML = `
+                        <div class="name">${candidate.name}</div>
+                        <div class="role">${candidate.skills.slice(0, 3).join(', ')}</div>
+                        <div class="ai-badge ${badgeClass}">
+                            <i class="fa-solid fa-brain"></i> Match: ${candidate.matchScore}%
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        // Drag & Drop Handlers
+        function allowDrop(e) { e.preventDefault(); }
+        function drop(e, targetStage) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            const candidate = candidates.find(c => c.id === id);
+            if (candidate) {
+                candidate.stage = targetStage;
+                renderCandidates();
+            }
+        }
+
+        // Render Tables
+        function renderCandidatesTable() {
+            const tableBody = document.getElementById('fullCandidatesTable');
+            tableBody.innerHTML = candidates.map(c => {
+                let badgeClass = c.matchScore >= 80 ? 'match-high' : c.matchScore >= 50 ? 'match-med' : 'match-low';
+                return `
+                    <tr>
+                        <td><strong>${c.name}</strong></td>
+                        <td>${c.email}</td>
+                        <td>${c.skills.map(s => `<span class="skills-tag">${s}</span>`).join('')}</td>
+                        <td><span class="ai-badge ${badgeClass}"><i class="fa-solid fa-brain"></i> ${c.matchScore}%</span></td>
+                        <td><strong>${c.stage}</strong></td>
+                        <td>
+                            <button class="btn btn-primary" style="padding: 4px 8px; font-size:0.75rem;" onclick="moveStage('${c.id}')">Advance</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderTopCandidatesTable() {
+            const sorted = [...candidates].sort((a, b) => b.matchScore - a.matchScore).slice(0, 5);
+            const tableBody = document.getElementById('topCandidatesTable');
+            tableBody.innerHTML = sorted.map(c => {
+                let badgeClass = c.matchScore >= 80 ? 'match-high' : c.matchScore >= 50 ? 'match-med' : 'match-low';
+                return `
+                    <tr>
+                        <td><strong>${c.name}</strong></td>
+                        <td>Senior Full Stack Engineer</td>
+                        <td>${c.skills.slice(0, 3).join(', ')}</td>
+                        <td><span class="ai-badge ${badgeClass}"><i class="fa-solid fa-brain"></i> ${c.matchScore}%</span></td>
+                        <td>${c.stage}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function moveStage(id) {
+            const stages = ['Applied', 'Screened', 'Interview', 'Offered', 'Hired'];
+            const candidate = candidates.find(c => c.id === id);
+            if (candidate) {
+                let currentIndex = stages.indexOf(candidate.stage);
+                if (currentIndex < stages.length - 1) {
+                    candidate.stage = stages[currentIndex + 1];
+                    renderCandidates();
+                }
+            }
+        }
+
+        // Render Interview Scheduler
+        function renderInterviews() {
+            const tableBody = document.getElementById('interviewsTable');
+            tableBody.innerHTML = interviews.map(i => `
+                <tr>
+                    <td><strong>${i.candidateName}</strong></td>
+                    <td>${i.type}</td>
+                    <td><i class="fa-regular fa-clock"></i> ${new Date(i.time).toLocaleString()}</td>
+                    <td>${i.interviewer}</td>
+                    <td><span class="skills-tag">Scheduled</span></td>
+                </tr>
+            `).join('');
+            saveData();
+        }
+
+        function populateCandidateDropdown() {
+            const select = document.getElementById('scheduleCandidateSelect');
+            select.innerHTML = candidates.map(c => `<option value="${c.name}">${c.name} (${c.stage})</option>`).join('');
+        }
+
+        // Metrics Calculation
+        function updateDashboardMetrics() {
+            document.getElementById('totalCandidatesCount').innerText = candidates.length;
+            
+            const totalScore = candidates.reduce((acc, c) => acc + c.matchScore, 0);
+            const avg = candidates.length ? Math.round(totalScore / candidates.length) : 0;
+            document.getElementById('avgMatchRate').innerText = `${avg}%`;
+
+            const shortlisted = candidates.filter(c => ['Interview', 'Offered', 'Hired'].includes(c.stage)).length;
+            document.getElementById('shortlistedCount').innerText = shortlisted;
+
+            document.getElementById('interviewsCount').innerText = interviews.length;
+        }
+
+        // Form Submit Handlers
+        function handleCandidateSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('candName').value;
+            const email = document.getElementById('candEmail').value;
+            const resumeText = document.getElementById('candResume').value;
+
+            const extractedSkills = extractSkillsFromText(resumeText);
+            const score = calculateAIMatchScore(extractedSkills);
+
+            candidates.push({
+                id: Date.now().toString(),
+                name,
+                email,
+                skills: extractedSkills.length > 0 ? extractedSkills : ['General'],
+                matchScore: score,
+                stage: 'Applied'
+            });
+
+            closeCandidateModal();
+            document.getElementById('candName').value = '';
+            document.getElementById('candEmail').value = '';
+            document.getElementById('candResume').value = '';
+            renderCandidates();
+        }
+
+        function handleScheduleSubmit(e) {
+            e.preventDefault();
+            const candidateName = document.getElementById('scheduleCandidateSelect').value;
+            const type = document.getElementById('scheduleType').value;
+            const time = document.getElementById('scheduleTime').value;
+            const interviewer = document.getElementById('scheduleInterviewer').value;
+
+            interviews.push({
+                id: Date.now().toString(),
+                candidateName,
+                type,
+                time,
+                interviewer
+            });
+
+            // Automatically transition candidate to Interview stage if currently in earlier stages
+            const cand = candidates.find(c => c.name === candidateName);
+            if (cand && (cand.stage === 'Applied' || cand.stage === 'Screened')) {
+                cand.stage = 'Interview';
+            }
+
+            closeScheduleModal();
+            renderCandidates();
+            renderInterviews();
+        }
+
+        // Modals Toggle
+        function openCandidateModal() { document.getElementById('candidateModal').style.display = 'flex'; }
+        function closeCandidateModal() { document.getElementById('candidateModal').style.display = 'none'; }
+        function openScheduleModal() { document.getElementById('scheduleModal').style.display = 'flex'; }
+        function closeScheduleModal() { document.getElementById('scheduleModal').style.display = 'none'; }
+
+        // Local Storage Persistence
+        function saveData() {
+            localStorage.setItem('ats_candidates', JSON.stringify(candidates));
+            localStorage.setItem('ats_interviews', JSON.stringify(interviews));
+        }
+    </script>
+</body>
+</html>
